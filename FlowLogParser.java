@@ -9,10 +9,20 @@ public class FlowLogParser {
 
         System.out.println("Flow Log Parser started...");
 
+        if (!isFileValid(lookupTableFile)) {
+            System.out.println("Invalid lookup table file: " + lookupTableFile);
+            return;
+        }
+
+        if (!isFileValid(flowLogsFile)) {
+            System.out.println("Invalid flow logs file: " + flowLogsFile);
+            return;
+        }
+
         try {
             Map<String, String> lookup = readLookupTable(lookupTableFile);
             System.out.println("Lookup table read successfully");
-            
+
             Map<String, Integer> tagCounts = new LinkedHashMap<>();
             Map<String, Integer> portProtocolCounts = new LinkedHashMap<>();
 
@@ -23,6 +33,11 @@ public class FlowLogParser {
             System.out.println("Error reading lookup table: " + e.getMessage());
             e.printStackTrace();
         }
+    }
+
+    private static boolean isFileValid(String filePath) {
+        File file = new File(filePath);
+        return file.exists() && file.isFile() && file.canRead() && file.length() > 0;
     }
 
     private static Map<String, String> readLookupTable(String filePath) throws IOException {
