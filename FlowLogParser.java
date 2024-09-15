@@ -5,7 +5,7 @@ public class FlowLogParser {
     public static void main(String[] args) {
         String lookupTableFile = "lookup.csv";
         String flowLogsFile = "flowlog.txt";
-        String outputFile = "output.txt";
+        String outputFile = "output.csv";
 
         System.out.println("Flow Log Parser started...");
 
@@ -17,6 +17,7 @@ public class FlowLogParser {
             Map<String, Integer> portProtocolCounts = new LinkedHashMap<>();
 
             parseFlowLogs(flowLogsFile, lookup, tagCounts, portProtocolCounts);
+            writeOutput(outputFile, tagCounts, portProtocolCounts);
 
         } catch (IOException e) {
             System.out.println("Error reading lookup table: " + e.getMessage());
@@ -66,8 +67,27 @@ public class FlowLogParser {
 
             }
         }
-            
+
         tagCounts.forEach((k, v) -> System.out.println(k + ": " + v));
-        portProtocolCounts.forEach((k,v) -> System.err.println(k + ": " + v));
+        portProtocolCounts.forEach((k, v) -> System.err.println(k + ": " + v));
+    }
+    
+    public static void writeOutput(String filePath, Map<String, Integer> tagCounts,
+            Map<String, Integer> portProtocolCounts) throws IOException {
+
+        try (PrintWriter writer = new PrintWriter(new FileWriter(filePath))) {
+            writer.println("Tag Counts:");
+            writer.println("Tag, Count");
+
+            tagCounts.forEach((k, v) -> writer.println(k + "," + v));
+            
+            writer.println("\nPort/Protocol Combination Counts: ");
+            writer.println("Port, Protocol, Count");
+
+            portProtocolCounts.forEach((k, v) -> {
+                String[] parts = k.split(",");
+                writer.println(parts[0] + "," + parts[1] + "," + v);
+            });
+        }
     }
 }
