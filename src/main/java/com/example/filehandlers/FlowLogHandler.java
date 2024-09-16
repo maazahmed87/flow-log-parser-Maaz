@@ -21,6 +21,7 @@ public class FlowLogHandler extends FileHandler {
         processFile(null);
     }
 
+    // Process the flow log file, optionally using parallel execution
     public void processFile(ExecutorService executor) throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {
             String line;
@@ -47,6 +48,7 @@ public class FlowLogHandler extends FileHandler {
         }
     }
 
+    // Process a single line of the flow log file
     private void processLine(String line) {
         String[] fields = line.trim().split("\\s+");
 

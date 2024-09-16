@@ -11,6 +11,7 @@ public class LookupTableHandler extends FileHandler {
         this.lookup = new HashMap<>();
     }
 
+    // Process the lookup table
     @Override
     public void processFile() throws IOException {
         try (BufferedReader reader = new BufferedReader(new FileReader(filePath))) {

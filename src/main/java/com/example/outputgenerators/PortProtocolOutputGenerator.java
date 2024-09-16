@@ -11,6 +11,7 @@ public class PortProtocolOutputGenerator extends OutputGenerator {
         this.portProtocolCounts = portProtocolCounts;
     }
 
+    // Generate the port/protocol output file
     @Override
     public void generateOutput() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {

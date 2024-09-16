@@ -11,6 +11,7 @@ public class TagCountOutputGenerator extends OutputGenerator {
         this.tagCounts = tagCounts;
     }
 
+    // Generate the tag count output file
     @Override
     public void generateOutput() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {

@@ -8,6 +8,7 @@ import java.util.Properties;
 public class ConfigurationManager {
     private Properties properties = new Properties();
 
+    // Constructor to load properties from a configuration file
     public ConfigurationManager(String configFilePath) {
         try (InputStream input = new FileInputStream(configFilePath)) {
             properties.load(input);
@@ -16,6 +17,7 @@ public class ConfigurationManager {
         }
     }
 
+    // Get a property value, or return a default if not found
     public String getProperty(String key, String defaultValue) {
         return properties.getProperty(key, defaultValue);
     }

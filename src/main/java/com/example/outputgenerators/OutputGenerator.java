@@ -9,5 +9,6 @@ public abstract class OutputGenerator {
         this.filePath = filePath;
     }
 
+    // Abstract method to generate output file
     public abstract void generateOutput() throws IOException;
 }
