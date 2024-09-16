@@ -1,9 +1,10 @@
-import filehandlers.*;
-import outputgenerators.*;
-import utils.ConfigurationManager;
-
+package com.example;
 import java.io.IOException;
 import java.util.concurrent.*;
+
+import com.example.filehandlers.*;
+import com.example.outputgenerators.*;
+import com.example.utils.ConfigurationManager;
 
 public class FlowLogParser {
     private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();

@@ -1,2 +1,4 @@
-*.class
-output.csv
+# Maven build output
+target/
+
+output/

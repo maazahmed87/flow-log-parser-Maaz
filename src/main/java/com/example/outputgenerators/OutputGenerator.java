@@ -1,4 +1,4 @@
-package outputgenerators;
+package com.example.outputgenerators;
 
 import java.io.IOException;
 
