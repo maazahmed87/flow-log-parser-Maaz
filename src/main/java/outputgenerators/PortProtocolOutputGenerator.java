@@ -14,7 +14,7 @@ public class PortProtocolOutputGenerator extends OutputGenerator {
     @Override
     public void generateOutput() throws IOException {
         try (BufferedWriter writer = new BufferedWriter(new FileWriter(filePath))) {
-            writer.write("PortProtocol,Count\n");
+            writer.write("Port/Protocol,Count\n");
             for (Map.Entry<String, Integer> entry : portProtocolCounts.entrySet()) {
                 writer.write(entry.getKey() + "," + entry.getValue() + "\n");
             }

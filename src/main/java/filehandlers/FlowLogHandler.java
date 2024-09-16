@@ -23,9 +23,10 @@ public class FlowLogHandler extends FileHandler {
             while ((line = reader.readLine()) != null) {
                 String[] fields = line.trim().split("\\s+");
 
-                if (fields.length < 14)
+                if (fields.length != 14) {
+                    System.err.println("Malformed line: " + line);
                     continue;
-
+                }
                 String dstPort = fields[6];
                 String protocol = fields[7].equals("6") ? "tcp" : fields[7].equals("17") ? "udp" : "icmp";
 
@@ -49,4 +50,5 @@ public class FlowLogHandler extends FileHandler {
     public Map<String, Integer> getPortProtocolCounts() {
         return portProtocolCounts;
     }
+
 }

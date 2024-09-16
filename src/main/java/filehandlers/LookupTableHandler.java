@@ -18,7 +18,8 @@ public class LookupTableHandler extends FileHandler {
             reader.readLine();
 
             while ((line = reader.readLine()) != null) {
-                String[] parts = line.split(",");
+                
+                String[] parts = line.trim().split(",");
                 if (parts.length == 3) {
                     String key = (parts[0] + "," + parts[1]).toLowerCase();
                     lookup.put(key, parts[2]);
