@@ -29,7 +29,7 @@ public class FlowLogHandler extends FileHandler {
                 String dstPort = fields[6];
                 String protocol = fields[7].equals("6") ? "tcp" : fields[7].equals("17") ? "udp" : "icmp";
 
-                String key = dstPort + "," + protocol;
+                String key = (dstPort + "," + protocol).toLowerCase();
                 String tag = lookup.getOrDefault(key, "untagged");
 
                 tagCounts.put(tag, tagCounts.getOrDefault(tag, 0) + 1);

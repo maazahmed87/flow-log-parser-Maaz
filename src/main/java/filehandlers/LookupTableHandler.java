@@ -20,7 +20,7 @@ public class LookupTableHandler extends FileHandler {
             while ((line = reader.readLine()) != null) {
                 String[] parts = line.split(",");
                 if (parts.length == 3) {
-                    String key = parts[0] + "," + parts[1];
+                    String key = (parts[0] + "," + parts[1]).toLowerCase();
                     lookup.put(key, parts[2]);
                 }
             }
