@@ -24,7 +24,11 @@ public class LookupTableHandler extends FileHandler {
                     lookup.put(key, parts[2]);
                 }
             }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + filePath);
+            throw e;
         }
+        
     }
 
     public Map<String, String> getLookup() {

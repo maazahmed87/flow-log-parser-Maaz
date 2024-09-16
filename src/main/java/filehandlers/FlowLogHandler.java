@@ -36,6 +36,9 @@ public class FlowLogHandler extends FileHandler {
                 portProtocolCounts.put(key, portProtocolCounts.getOrDefault(key, 0) + 1);
 
             }
+        } catch (IOException e) {
+            System.err.println("Error reading file: " + filePath);
+            throw e;
         }
     }
 
