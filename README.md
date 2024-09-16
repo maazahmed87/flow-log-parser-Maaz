@@ -18,6 +18,7 @@ This program parses flow logs and maps them to predefined tags using a lookup ta
 ### Usage
 #### Prerequisites
 - Java 8 or higher
+- Apache Maven
 - Ensure correct paths are set in config/config.properties or pass them as command-line arguments.
 
 How to run the program:
