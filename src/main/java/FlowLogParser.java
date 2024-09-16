@@ -1,28 +1,21 @@
 import filehandlers.*;
 import outputgenerators.*;
+import utils.ConfigurationManager;
+
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.FileInputStream;
-import java.util.Properties;
+import java.util.concurrent.*;
 
 public class FlowLogParser {
+    private static final int NUM_THREADS = Runtime.getRuntime().availableProcessors();
+
     public static void main(String[] args) {
-        Properties props = new Properties();
 
-        String flowLogPath = "data/flowlog.txt";
-        String lookupPath = "data/lookup.csv";
-        String tagCountOutputPath = "output/tag_count_output.csv";
-        String portProtocolOutputPath = "output/port_protocol_output.csv";
-
-        try (InputStream input = new FileInputStream("config/config.properties")) {
-            props.load(input);
-            flowLogPath = props.getProperty("flowlog.file.path", flowLogPath);
-            lookupPath = props.getProperty("lookup.file.path", lookupPath);
-            tagCountOutputPath = props.getProperty("tagcount.output.path", tagCountOutputPath);
-            portProtocolOutputPath = props.getProperty("portprotocol.output.path", portProtocolOutputPath);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
+        ConfigurationManager configManager = new ConfigurationManager("config/config.properties");
+        String flowLogPath = configManager.getProperty("flowlog.file.path", "data/flowlog.txt");
+        String lookupPath = configManager.getProperty("lookup.file.path", "data/lookup.csv");
+        String tagCountOutputPath = configManager.getProperty("tagcount.output.path", "output/tag_count_output.csv");
+        String portProtocolOutputPath = configManager.getProperty("portprotocol.output.path",
+                "output/port_protocol_output.csv");
 
         if (args.length > 0) {
             flowLogPath = args[0];
@@ -30,50 +23,68 @@ public class FlowLogParser {
         if (args.length > 1) {
             lookupPath = args[1];
         }
-        
-        System.out.println("Flow Log Path: " + flowLogPath);
-        System.out.println("Lookup Path: " + lookupPath);
-        
 
-        System.out.println("Flow Log Parser started...");
+        System.out.println("INFO: Flow Log Path: " + flowLogPath);
+        System.out.println("INFO: Lookup Path: " + lookupPath);
+        System.out.println("INFO: Flow Log Parser started...");
 
         LookupTableHandler lookupHandler = new LookupTableHandler(lookupPath);
         if (!lookupHandler.isFileValid()) {
-            System.out.println("Invalid lookup table file: " + lookupPath);
+            System.err.println("ERROR: Invalid lookup table file: " + lookupPath);
             return;
         }
-        System.out.println("Lookup table file is valid.");
 
         FlowLogHandler flowLogHandler = new FlowLogHandler(flowLogPath, lookupHandler.getLookup());
         if (!flowLogHandler.isFileValid()) {
-            System.out.println("Invalid flow logs file: " + flowLogPath);
+            System.err.println("ERROR: Invalid flow logs file: " + flowLogPath);
             return;
         }
-        System.out.println("Flow logs file is valid.");
 
+        ExecutorService executor = Executors.newFixedThreadPool(NUM_THREADS);
         try {
-            lookupHandler.processFile();
-            System.out.println("Lookup table read successfully. Entries: " + lookupHandler.getLookup().size());
-
-            flowLogHandler.processFile();
-            System.out.println("Flow logs processed. Tag counts: " + flowLogHandler.getTagCounts().size() +
-                    ", Port-Protocol counts: " + flowLogHandler.getPortProtocolCounts().size());
-
-            OutputGenerator tagCountOutput = new TagCountOutputGenerator(tagCountOutputPath,
-                    flowLogHandler.getTagCounts());
-            tagCountOutput.generateOutput();
-            System.out.println("Tag count output generated: " + tagCountOutputPath);
-
-            OutputGenerator portProtocolOutput = new PortProtocolOutputGenerator(portProtocolOutputPath,
-                    flowLogHandler.getPortProtocolCounts());
-            portProtocolOutput.generateOutput();
-            System.out.println("Port-Protocol output generated: " + portProtocolOutputPath);
-
-            System.out.println("Output files generated successfully");
-
+            processLookupTable(lookupHandler);
+            processFlowLogs(flowLogHandler, executor);
+            generateOutputs(tagCountOutputPath, portProtocolOutputPath, flowLogHandler);
         } catch (IOException e) {
-            System.out.println("Error processing files: " + e.getMessage());
+            System.err.println("ERROR: Error processing files: " + e.getMessage());
             e.printStackTrace();
+        } finally {
+            shutdownExecutor(executor);
+        }
+    }
+
+    private static void processLookupTable(LookupTableHandler lookupHandler) throws IOException {
+        lookupHandler.processFile();
+        System.out.println("INFO: Lookup table read successfully. Entries: " + lookupHandler.getLookup().size());
+    }
+
+    private static void processFlowLogs(FlowLogHandler flowLogHandler, ExecutorService executor) throws IOException {
+        flowLogHandler.processFile(executor);
+        System.out.println("INFO: Flow logs processed. Tag counts: " + flowLogHandler.getTagCounts().size() +
+                ", Port-Protocol counts: " + flowLogHandler.getPortProtocolCounts().size());
+    }
+
+    private static void generateOutputs(String tagCountOutputPath, String portProtocolOutputPath,
+            FlowLogHandler flowLogHandler) throws IOException {
+        OutputGenerator tagCountOutput = new TagCountOutputGenerator(tagCountOutputPath, flowLogHandler.getTagCounts());
+        tagCountOutput.generateOutput();
+        System.out.println("INFO: Tag count output generated: " + tagCountOutputPath);
+
+        OutputGenerator portProtocolOutput = new PortProtocolOutputGenerator(portProtocolOutputPath,
+                flowLogHandler.getPortProtocolCounts());
+        portProtocolOutput.generateOutput();
+        System.out.println("INFO: Port-Protocol output generated: " + portProtocolOutputPath);
+    }
+
+    private static void shutdownExecutor(ExecutorService executor) {
+        executor.shutdown();
+        try {
+            if (!executor.awaitTermination(1, TimeUnit.MINUTES)) {
+                System.err.println("WARNING: Executor did not terminate in the specified time.");
+            }
+        } catch (InterruptedException e) {
+            System.err.println("ERROR: Thread interruption during shutdown: " + e.getMessage());
+            Thread.currentThread().interrupt();
         }
     }
 }

@@ -26,7 +26,7 @@ public class LookupTableHandler extends FileHandler {
                 }
             }
         } catch (IOException e) {
-            System.err.println("Error reading file: " + filePath);
+            System.err.println("ERROR: Can't read file: " + filePath);
             throw e;
         }
         
